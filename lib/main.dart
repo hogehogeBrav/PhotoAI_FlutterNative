@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(const MyApp());
@@ -15,36 +17,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'PhotoAI FlutterNative',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'PhotoAI FlutterNative'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -52,7 +35,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late File? image = null;
+  late var image = null;
+  late var decodeResult = null;
   final picker = ImagePicker();
 
   Future getImage() async {
@@ -61,6 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       if (pickedFile != null) {
         image = File(pickedFile.path);
+        decodeResult = null;
         upload(pickedFile.path);
       }
     });
@@ -76,32 +61,60 @@ class _MyHomePageState extends State<MyHomePage> {
 
     request.files.add(multipartFile);
 
-    http.StreamedResponse response = await request.send();
-    var json = await http.Response.fromStream(response);
+    var response = await request.send();
+    var responseString = await response.stream.bytesToString();
 
-    print(json.body);
+    // jsondecode
+    decodeResult = json.decode(responseString);
+
+    setState(() {});
+    // print(decodeResult[0]['labels']);
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-          child: image == null ? Text('画像が選択されていません。') : Image.file(image!)),
+      body: Column(
+        children: [_imageArea(image), _textArea(image, decodeResult)],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: getImage,
         child: const Icon(Icons.add_a_photo),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
+  }
+
+  Widget _imageArea(image) {
+    if (image == null) {
+      return Container(
+        alignment: Alignment(0.0, 0.0),
+        height: 200,
+        width: 400,
+        margin: EdgeInsets.all(40),
+        child: SvgPicture.asset('assets/img/select-photo.svg'),
+      );
+    } else {
+      return Container(
+          alignment: Alignment(0.0, 0.0),
+          height: 200,
+          width: 400,
+          margin: EdgeInsets.all(40),
+          child: Image.file(image!));
+    }
+  }
+
+  Widget _textArea(image, result) {
+    if (image == null) {
+      return Text("画像を選択してください");
+    } else if (result == null) {
+      return Text("判別中...");
+    } else {
+      String percent =
+          (double.parse(result[0]['results']) * 100).ceil().toString();
+      return Text(percent + "%の確率で" + result[0]['labels'] + "やんけ！");
+    }
   }
 }
