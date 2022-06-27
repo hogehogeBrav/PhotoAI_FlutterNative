@@ -94,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
       width: 400,
       margin: EdgeInsets.all(40),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(17),
           border: Border.all(width: 2, color: Colors.grey)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(15),
