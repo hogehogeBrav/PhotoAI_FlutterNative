@@ -88,22 +88,31 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _imageArea(image) {
-    if (image == null) {
-      return Container(
-        alignment: Alignment(0.0, 0.0),
-        height: 200,
-        width: 400,
-        margin: EdgeInsets.all(40),
-        child: SvgPicture.asset('assets/img/select-photo.svg'),
-      );
-    } else {
-      return Container(
-          alignment: Alignment(0.0, 0.0),
-          height: 200,
-          width: 400,
-          margin: EdgeInsets.all(40),
-          child: Image.file(image!));
-    }
+    return Container(
+      alignment: Alignment(0.0, 0.0),
+      height: 200,
+      width: 400,
+      margin: EdgeInsets.all(40),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(width: 2, color: Colors.grey)),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: image == null
+            ? SvgPicture.asset(
+                'assets/img/select-photo.svg',
+                fit: BoxFit.fill,
+                // height: 200,
+                width: 400,
+              )
+            : Image.file(
+                image,
+                fit: BoxFit.fill,
+                // height: 200,
+                width: 400,
+              ),
+      ),
+    );
   }
 
   Widget _textArea(image, result) {
