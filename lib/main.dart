@@ -6,6 +6,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+//uri config etc...
+import 'config/uri.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -56,10 +59,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future upload(String filePath) async {
     // connect to localhost
-    Uri uri = Uri.parse("http://127.0.0.1:8081/predict");
+    Uri uri = Uri.parse(endpointIos);
     if (Platform.isAndroid) {
       // Android
-      uri = Uri.parse("http://10.0.2.2:8081/predict");
+      uri = Uri.parse(endpointAndroid);
     }
 
     http.MultipartRequest request = new http.MultipartRequest("POST", uri);
