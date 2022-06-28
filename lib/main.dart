@@ -40,7 +40,10 @@ class _MyHomePageState extends State<MyHomePage> {
   final picker = ImagePicker();
 
   Future getImage() async {
+    // gallery
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    // camera
+    // final pickedFile = await picker.getImage(source: ImageSource.camera);
 
     setState(() {
       if (pickedFile != null) {
@@ -52,7 +55,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future upload(String filePath) async {
-    Uri uri = Uri.parse("http://localhost:8081/predict");
+    // connect to localhost
+    Uri uri = Uri.parse("http://127.0.0.1:8081/predict");
+    if (Platform.isAndroid) {
+      // Android
+      uri = Uri.parse("http://10.0.2.2:8081/predict");
+    }
 
     http.MultipartRequest request = new http.MultipartRequest("POST", uri);
 
@@ -62,12 +70,17 @@ class _MyHomePageState extends State<MyHomePage> {
     request.files.add(multipartFile);
 
     var response = await request.send();
-    var responseString = await response.stream.bytesToString();
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      var responseString = await response.stream.bytesToString();
+      // jsondecode
 
-    // jsondecode
-    decodeResult = json.decode(responseString);
+      decodeResult = json.decode(responseString);
+      setState(() {});
+    } else {
+      throw Exception('Failed to connect to API');
+    }
 
-    setState(() {});
     // print(decodeResult[0]['labels']);
   }
 
