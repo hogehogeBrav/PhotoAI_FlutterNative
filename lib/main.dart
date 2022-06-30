@@ -42,8 +42,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance
-        ?.addPostFrameCallback((_) => _showTutorial(context));
     return MaterialApp(
       title: 'PhotoAI FlutterNative',
       theme: ThemeData(
@@ -114,6 +112,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance
+        ?.addPostFrameCallback((_) => _showTutorial(context));
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
