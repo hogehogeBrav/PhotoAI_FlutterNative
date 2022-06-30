@@ -4,13 +4,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_overboard/flutter_overboard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 //uri config etc...
 import 'config/uri.dart';
+import 'flutter_overboard_page.dart';
+
+//tutorial page
+// import 'flutter_overboard_page.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+void _showTutorial(BuildContext context) async {
+  final pref = await SharedPreferences.getInstance();
+
+  if (pref.getBool('isAlreadyFirstLaunch') != true) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return FlutterOverboardPage();
+        },
+        fullscreenDialog: true,
+      ),
+    );
+    pref.setBool('isAlreadyFirstLaunch', true);
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -19,6 +42,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance
+        ?.addPostFrameCallback((_) => _showTutorial(context));
     return MaterialApp(
       title: 'PhotoAI FlutterNative',
       theme: ThemeData(
