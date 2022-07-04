@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_overboard/flutter_overboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -65,11 +64,19 @@ class _MyHomePageState extends State<MyHomePage> {
   late var decodeResult = null;
   final picker = ImagePicker();
 
+  int _selectedIndex = 1;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   Future getImage() async {
     // gallery
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    // final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     // camera
-    // final pickedFile = await picker.getImage(source: ImageSource.camera);
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
     setState(() {
       if (pickedFile != null) {
@@ -106,7 +113,6 @@ class _MyHomePageState extends State<MyHomePage> {
     } else {
       throw Exception('Failed to connect to API');
     }
-
     // print(decodeResult[0]['labels']);
   }
 
@@ -118,22 +124,97 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Column(
-        children: [_imageArea(image), _textArea(image, decodeResult)],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: getImage,
-        child: const Icon(Icons.add_a_photo),
+      // body: Column(
+      //   children: [_imageArea(image), _textArea(image, decodeResult)],
+      // ),
+      body: _bodyChange(_selectedIndex),
+      floatingActionButton: _selectedIndex == 1
+          ? FloatingActionButton(
+              onPressed: getImage,
+              child: const Icon(Icons.add_a_photo),
+            )
+          : null,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'ホーム',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'はんべつ',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'せってい',
+          ),
+        ],
       ),
     );
   }
 
+  Widget _bodyChange(int index) {
+    // if (index == 1) {
+    //   return _predict();
+    // } else {
+    //   return const Center(
+    //     child: Text("home"),
+    //   );
+    // }
+    switch (index) {
+      case 0:
+        return _homePage();
+      case 1:
+        return _predict();
+      default:
+        return _homePage();
+    }
+  }
+
+  // homepage
+  Widget _homePage() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "Home",
+            textAlign: TextAlign.center,
+          ),
+          ElevatedButton(
+            child: const Text('あそびかた'),
+            style: ElevatedButton.styleFrom(
+              primary: Colors.blue,
+              onPrimary: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () async {
+              final pref = await SharedPreferences.getInstance();
+              pref.setBool('isAlreadyFirstLaunch', false);
+              setState(() {});
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // predict
+  Widget _predict() {
+    return Column(
+        children: [_imageArea(image), _textArea(image, decodeResult)]);
+  }
+
   Widget _imageArea(image) {
     return Container(
-      alignment: Alignment(0.0, 0.0),
+      alignment: const Alignment(0.0, 0.0),
       height: 200,
       width: 400,
-      margin: EdgeInsets.all(40),
+      margin: const EdgeInsets.all(40),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(17),
           border: Border.all(width: 2, color: Colors.grey)),
@@ -158,9 +239,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _textArea(image, result) {
     if (image == null) {
-      return Text("画像を選択してください");
+      return const Text("画像を選択してください");
     } else if (result == null) {
-      return Text("判別中...");
+      return const Text("判別中...");
     } else {
       String percent =
           (double.parse(result[0]['results']) * 100).ceil().toString();

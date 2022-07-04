@@ -29,7 +29,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  image_picker: 0.7.5
+  image_picker: 0.8.5
   flutter_svg: 1.0.3
   http: 
   flutter_overboard: 3.1.1

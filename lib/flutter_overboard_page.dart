@@ -6,20 +6,26 @@ class FlutterOverboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('FlutterOverboardPage'),
-      ),
-      body: OverBoard(
-        pages: pages,
-        showBullets: true,
-        skipCallback: () {
-          // when user select SKIP
-          Navigator.pop(context);
-        },
-        finishCallback: () {
-          // when user select NEXT
-          Navigator.pop(context);
-        },
+      // appBar: AppBar(
+      //   title: Text('FlutterOverboardPage'),
+      // ),
+      body: Container(
+        color: const Color(0xFFf1fff0),
+        padding: const EdgeInsets.only(bottom: 80, top: 80),
+        child: OverBoard(
+          pages: pages,
+          showBullets: true,
+          nextText: "次へ",
+          skipText: "スキップ",
+          skipCallback: () {
+            // when user select SKIP
+            Navigator.pop(context);
+          },
+          finishCallback: () {
+            // when user select NEXT
+            Navigator.pop(context);
+          },
+        ),
       ),
     );
   }
